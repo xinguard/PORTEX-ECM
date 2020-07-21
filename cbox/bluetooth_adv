@@ -9,5 +9,5 @@ agent NoInputNoOutput
 default-agent 
 EOF
 
-sudo /usr/bin/rfcomm watch hci0 1 getty rfcomm0 115200 vt220 -a root -l /usr/local/bin/cbox_cli
+sudo /usr/bin/rfcomm watch hci0 1 getty rfcomm0 115200 vt220 -a root -l /home/portex/portex_ecm.d/cbox/cbox_cli
 

@@ -5,7 +5,7 @@
 
 ROOT_DIR=${TEST_ROOT_DIR:-/}
 
-BASE_DIR=${ROOT_DIR}/opt/mcs/tnlctl/
+BASE_DIR=${ROOT_DIR}/home/portex/portex_ecm.d/tnlctl/
 BIN_DIR=${BASE_DIR}/bin/
 API_DIR=${BIN_DIR}/api/reg/v1/
 CONF_DIR=${BASE_DIR}/conf/
@@ -24,8 +24,7 @@ API_METHOD=getkey
 API_SUBFIX=
 
 # use customerize config file to overwrite some setting (for private cloud)
-if [ -f ${CONF_FILE_CUSTOM} ]
-then
+if [ -f ${CONF_FILE_CUSTOM} ]; then
     source ${CONF_FILE_CUSTOM}
 fi
 
@@ -37,15 +36,13 @@ HOSTNAME=$3
 SERIAL=$4
 CODE=$5
 
-if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]
-then
+if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]; then
     echo "$0 <username> <email> <hostname> <serial> <activate_code>"
     exit
 fi
 
 # getkey
 params="user=${USER}&email=${EMAIL}&hostname=${HOSTNAME}&serial=${SERIAL}&code=${CODE}"
-curl "${API_URL}?${params}" | python -c "import sys, json; print json.load(sys.stdin)['key']" > ${KEY_FILE}
+curl "${API_URL}?${params}" | python -c "import sys, json; print json.load(sys.stdin)['key']" >${KEY_FILE}
 chmod 600 ${KEY_FILE}
 cat ${KEY_FILE}
-

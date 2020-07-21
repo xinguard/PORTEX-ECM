@@ -1,39 +1,34 @@
 #!/bin/bash
-
-PROG01=/opt/mcs/cbox/regcheckc
-PROG02=/opt/mcs/cbox/tnlcheckc
+#
+#
+#
+PROG01=/home/portex/portex_ecm.d/cbox/regcheckc
+PROG02=/home/portex/portex_ecm.d/cbox/tnlcheckc
 
 declare -a TESTARRAY
 
-
-DATE=`date`
+DATE=$(date)
 echo $DATE
 
-for PROGLIST in $PROG01 $PROG02
-do
-        CMD=`echo $PROGLIST | awk '{print $NF}' FS=/`
+for PROGLIST in $PROG01 $PROG02; do
+        CMD=$(echo $PROGLIST | awk '{print $NF}' FS=/)
         echo $CMD
 
+        for loop in $(ps aux | grep $CMD | grep -v grep | awk '{print $2}'); do
+                TESTARRAY+=($loop)
+        done
 
-for loop in `ps aux | grep $CMD | grep -v grep | awk '{print $2}'`
-do
-        TESTARRAY+=($loop)
+        if [ ${#TESTARRAY[@]} == 0 ]; then
+                echo "The arrray size is 0"
+                echo "Run $PROGLIST..... "
+                sudo $PROGLIST >/dev/null 2>&1
+                TESTARRAY=()
+        else
+                echo "The array size is not 0"
+                IFS=$'\n'
+                echo "${TESTARRAY[*]}"
+                TESTARRAY=()
+        fi
+
+        echo ""
 done
-
-if [ ${#TESTARRAY[@]} == 0 ]
-then
-        echo "The arrray size is 0"
-        echo "Run $PROGLIST..... "
-        sudo $PROGLIST >/dev/null 2>&1
-        TESTARRAY=()
-else
-        echo "The array size is not 0"
-        IFS=$'\n'
-        echo "${TESTARRAY[*]}"
-        TESTARRAY=()
-fi
-
-
-echo ""
-done
-

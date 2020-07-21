@@ -5,7 +5,7 @@
 
 ROOT_DIR=${TEST_ROOT_DIR:-/}
 
-BASE_DIR=${ROOT_DIR}/opt/mcs/tnlctl/
+BASE_DIR=${ROOT_DIR}/home/portex/portex_ecm.d/tnlctl/
 BIN_DIR=${BASE_DIR}/bin/
 API_DIR=${BIN_DIR}/api/reg/v1/
 CONF_DIR=${BASE_DIR}/conf/
@@ -23,8 +23,7 @@ API_METHOD=activate
 API_SUBFIX=
 
 # use customerize config file to overwrite some setting (for private cloud)
-if [ -f ${CONF_FILE_CUSTOM} ]
-then
+if [ -f ${CONF_FILE_CUSTOM} ]; then
     source ${CONF_FILE_CUSTOM}
 fi
 
@@ -36,8 +35,7 @@ HOSTNAME=$3
 SERIAL=$4
 CODE=$5
 
-if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]
-then
+if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]; then
     echo "$0 <username> <email> <hostname> <serial> <activate_code>"
     exit
 fi
@@ -48,12 +46,11 @@ curl "${API_URL}?${params}"
 
 # update config file based on config template
 echo "update config..."
-cat ${TMPL_CONF_FILE} \
-    | sed "s/@@REG_USER@@/\"${USER}\"/" \
-    | sed "s/@@REG_EMAIL@@/\"${EMAIL}\"/" \
-    | sed "s/@@REG_HOSTNAME@@/\"${HOSTNAME}\"/" \
-    | sed "s/@@REG_CODE@@/\"${CODE}\"/" \
-    | sed "s/@@REG_SERIAL@@/\"${SERIAL}\"/" \
-    > ${CONF_FILE}
+cat ${TMPL_CONF_FILE} |
+    sed "s/@@REG_USER@@/\"${USER}\"/" |
+    sed "s/@@REG_EMAIL@@/\"${EMAIL}\"/" |
+    sed "s/@@REG_HOSTNAME@@/\"${HOSTNAME}\"/" |
+    sed "s/@@REG_CODE@@/\"${CODE}\"/" |
+    sed "s/@@REG_SERIAL@@/\"${SERIAL}\"/" \
+        >${CONF_FILE}
 echo "done."
-

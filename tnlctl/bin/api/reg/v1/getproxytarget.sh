@@ -7,7 +7,7 @@ PRIVATE_CLOUD=0
 
 ROOT_DIR=${TEST_ROOT_DIR:-/}
 
-BASE_DIR=${ROOT_DIR}/opt/mcs/tnlctl/
+BASE_DIR=${ROOT_DIR}/home/portex/portex_ecm.d/tnlctl/
 BIN_DIR=${BASE_DIR}/bin/
 API_DIR=${BIN_DIR}/api/reg/v1/
 CONF_DIR=${BASE_DIR}/conf/
@@ -28,8 +28,7 @@ API_METHOD=getproxytarget
 API_SUBFIX=
 
 # use customerize config file to overwrite some setting (for private cloud)
-if [ -f ${CONF_FILE_CUSTOM} ]
-then
+if [ -f ${CONF_FILE_CUSTOM} ]; then
     source ${CONF_FILE_CUSTOM}
 fi
 
@@ -41,34 +40,30 @@ HOSTNAME=$3
 SERIAL=$4
 CODE=$5
 
-if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]
-then
+if [ "x${USER}" = "x" -o "x${EMAIL}" = "x" -o "${HOSTNAME}" = "x" -o "x${SERIAL}" = "x" -o "x${CODE}" = "x" ]; then
     echo "$0 <username> <email> <hostname> <serial> <activate_code>"
     exit
 fi
 
 # getproxytarget
 params="user=${USER}&email=${EMAIL}&hostname=${HOSTNAME}&serial=${SERIAL}&code=${CODE}"
-curl "${API_URL}?${params}" | python -c "import sys, json; result = json.load(sys.stdin); print result['key'];print 'TARGET_IP_PORT='+result['target']" > ${TMP_FILE}
+curl "${API_URL}?${params}" | python -c "import sys, json; result = json.load(sys.stdin); print result['key'];print 'TARGET_IP_PORT='+result['target']" >${TMP_FILE}
 # split to key
-grep -v "TARGET_IP_PORT=" ${TMP_FILE} > ${KEY_FILE}
+grep -v "TARGET_IP_PORT=" ${TMP_FILE} >${KEY_FILE}
 chmod 600 ${KEY_FILE}
 cat ${KEY_FILE}
 # grep the ip:port
-grep "TARGET_IP_PORT=" ${TMP_FILE} | awk -F= '{print $2}' > ${TARGET_FILE}
+grep "TARGET_IP_PORT=" ${TMP_FILE} | awk -F= '{print $2}' >${TARGET_FILE}
 cat ${TARGET_FILE}
 
-if [ ${PRIVATE_CLOUD} = 1 ]
-then
+if [ ${PRIVATE_CLOUD} = 1 ]; then
     _target_str=$(cat ${TARGET_FILE})
-    set -f                                       # avoid globbing (expansion of *).
+    set -f # avoid globbing (expansion of *).
     _targets=(${_target_str//,/ })
-    for i in "${!_targets[@]}"
-    do
-        _pxy_id=$((i+1))
+    for i in "${!_targets[@]}"; do
+        _pxy_id=$((i + 1))
         echo "Proxy Target $_pxy_id: ${_targets[i]}"
     done
 fi
 
 rm ${TMP_FILE}
-

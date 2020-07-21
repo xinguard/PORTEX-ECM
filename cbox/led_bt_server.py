@@ -62,7 +62,7 @@ send_command("red_blink")
 
 
 
-subprocess.call(['/opt/mcs/cbox/bluetooth_adv'], shell=True)
+subprocess.call(['/home/portex/portex_ecm.d/cbox/bluetooth_adv'], shell=True)
 #print >>sys.stderr, 'sending "%s"' % message
 message = ''
 
@@ -92,14 +92,14 @@ try:
                     #GPIO.output(LED_PIN, GPIO.HIGH) #-> send_command(message)
                     print('info')
                     # Send data
-                    message = subprocess.check_output(['/opt/mcs/tnlctl/bin/helper/get-serial.sh'])
+                    message = subprocess.check_output(['/home/portex/portex_ecm.d/tnlctl/bin/helper/get-serial.sh'])
                     print >>sys.stderr, 'sending "%s"' % message
                     client_socket.sendall(message)
                     message = ''
                 elif data[0:4] == 'acti':
                     print('activate')
                     # Send data
-                    message = 'info: activate\n'+subprocess.check_output(['/opt/mcs/tnlctl/bin/api/reg/v1/activate.sh',data.split(':')[1],data.split(':')[2],data.split(':')[3],data.split(':')[4],data.split(':')[5]])
+                    message = 'info: activate\n'+subprocess.check_output(['/home/portex/portex_ecm.d/tnlctl/bin/api/reg/v1/activate.sh',data.split(':')[1],data.split(':')[2],data.split(':')[3],data.split(':')[4],data.split(':')[5]])
                     print >>sys.stderr, 'sending "%s"' % message
                     client_socket.sendall(message)
                     message =''
@@ -138,7 +138,7 @@ try:
                     send_command("white_on")
                     message =''
                     try:
-                        message = 'info: cloud\n'+ subprocess.check_output(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'])
+                        message = 'info: cloud\n'+ subprocess.check_output(['/home/portex/portex_ecm.d/tnlctl/bin/tnlctl.sh', 'start'])
                     except Exception as e:
                         print("Command failed: {}".format(e))
                     print >>sys.stderr, 'sending "%s"' % message

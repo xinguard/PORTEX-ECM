@@ -162,12 +162,12 @@ def run_mcsc(type):
     if not command_list:
         # run standard command here.
         if type == "start":
-            subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'], shell=False)
+            subprocess.call(['/home/portex/portex_ecm.d/tnlctl/bin/tnlctl.sh', 'start'], shell=False)
             print "MCS Cloud connect......."
             syslog.syslog(syslog.LOG_INFO, "MCS cloud connect.")
         elif type == "stop":
-            subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
-            subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
+            subprocess.call(['/home/portex/portex_ecm.d/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
+            subprocess.call(['/home/portex/portex_ecm.d/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
             print "MCS Cloud disconnect......."
             syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
     else:
@@ -365,10 +365,10 @@ def run_admin(type):
         # run standard command here.
         print type
         if type == "start":
-            #subprocess.call(['python', '/opt/mcs/cbox/led_bt_server.py'],
+            #subprocess.call(['python', '/home/portex/portex_ecm.d/cbox/led_bt_server.py'],
             #                shell=False)
             #os.system('service bluetooth start')
-            os.system('/opt/mcs/cbox/led_bt_server.py > /dev/null &')
+            os.system('/home/portex/portex_ecm.d/cbox/led_bt_server.py > /dev/null &')
             print "Bluetooth console enable"
             syslog.syslog(syslog.LOG_INFO, "Bluetooth console enable.")
         elif type == "stop":

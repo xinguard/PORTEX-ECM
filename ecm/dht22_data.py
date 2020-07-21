@@ -29,7 +29,7 @@ height = disp.height
 image = Image.new('1', (width, height))
 draw = ImageDraw.Draw(image)
 
-font=ImageFont.truetype("/opt/mcs/ecm/ARIALUNI.TTF", FONT_SIZE)
+font=ImageFont.truetype("/home/portex/portex_ecm.d/ecm/ARIALUNI.TTF", FONT_SIZE)
 try:
     while True:
         humidity, temperature = Adafruit_DHT.read_retry(22, 4)
