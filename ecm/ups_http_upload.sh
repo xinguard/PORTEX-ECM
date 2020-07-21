@@ -31,8 +31,7 @@ function http_upload() {
 			'UPS_INPUTV':'$INPUTV', \
 			'UPS_OUTPUTL':'$OUTPUTL', \
 			'UPS_REMAIN':'$REMAIN'}}" \
-		http://$CLOUD_SERVER:808$VER/api/v1/$ACCESS_TOKEN/telemetry \
-		--header "Content-Type:application/json"
+		http://$CLOUD_SERVER:808$VER/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
 }
 
 while true; do
