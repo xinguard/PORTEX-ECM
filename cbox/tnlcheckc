@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#
+#
 PROG=$0
 PRIVATE_CONF=/home/portex/portex_ecm.d/tnlctl/conf/custom.conf
 
@@ -9,42 +10,32 @@ if [ -f $PRIVATE_CONF ]; then
 else
   echo "Use public"
   TARGET_HOST=$(egrep "^TNL_SERVER_HOST" /home/portex/portex_ecm.d/tnlctl/conf/tnlctl.conf | awk -F= '{print $2}')
-
 fi
 echo "Target host is" $TARGET_HOST
 
-DATE=$(date)
-echo $DATE
-
 while true; do
-
+  DATE=$(date)
+  echo $DATE
   LED_W=$(echo -e "white_status\c" | nc -q 1 -U /var/run/uds_led)
   LED_B=$(echo -e "blue_status\c" | nc -q 1 -U /var/run/uds_led)
   if [ $LED_W = 'on' ] || [ $LED_B = 'on' ]; then
     PID=$(ps ax | egrep "$TARGET_HOST" | egrep -v "grep|$PROG" | awk '{print $1}')
-    # echo $PID
+    echo $PID
     if [[ $PID ]]; then
       echo "Tunnel exist."
-
       if [ $LED_B = 'off' ]; then
         echo -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
       fi
-
     else
-
       if [ $LED_B = 'on' ]; then
         echo -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
       fi
-
       if [ $LED_W = 'on' ]; then
         /home/portex/portex_ecm.d/tnlctl/bin/tnlctl.sh stop
         /home/portex/portex_ecm.d/tnlctl/bin/tnlctl.sh start
       fi
     fi
-
   fi
-
   echo ""
-
   sleep 5
 done

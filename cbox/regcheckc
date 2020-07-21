@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 #
-#
 PROG=$0
 PRIVATE_CONF=/home/portex/portex_ecm.d/tnlctl/conf/custom.conf
 
@@ -11,14 +10,14 @@ if [ -f $PRIVATE_CONF ]; then
 else
   echo "Use public"
   TARGET_HOST=$(egrep "^REG_SERVER_HOST" /home/portex/portex_ecm.d/tnlctl/conf/tnlctl.conf | awk -F= '{print $2}')
-
 fi
 echo "Target host is" $TARGET_HOST
 
 while true; do
-
-  date
+  DATE=$(date)
+  echo $DATE
   PTL=$(/bin/nc -zv -w 3 $TARGET_HOST 80 2>&1 | egrep "succeeded!")
+  # echo $PTL
   if [[ "$PTL" == "$LPTL" ]]; then
     echo "MCS Cloud control-channel status is not changed; status is $LPTL"
   elif [[ $PTL ]]; then
@@ -30,8 +29,6 @@ while true; do
     echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
     LPTL=$PTL
   fi
-
   echo ""
-
   sleep 5
 done
