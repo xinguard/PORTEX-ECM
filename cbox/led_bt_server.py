@@ -1,0 +1,183 @@
+#!/usr/bin/env python2.7
+import uuid
+from bluetooth import *
+import RPi.GPIO as GPIO
+
+import time
+import os
+import subprocess
+#import subprocess32 as subprocess
+from threading import Thread
+import socket
+import sys
+import syslog
+
+server_address = '/var/run/uds_led'
+
+def send_command(message):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.connect(server_address)
+    except socket.error, msg:
+        print >>sys.stderr, msg
+        return
+
+    try:
+
+        # Send data
+        print >>sys.stderr, 'sending "%s"' % message
+        sock.sendall(message)
+        
+        data = ''
+        if (message.find('status')!=-1):
+            amount_received = 0
+            amount_expected = 16
+    
+        
+        #while amount_received < amount_expected:
+            data = sock.recv(16)
+            amount_received += len(data)
+            #print >>sys.stderr, 'received "%s"' % data
+
+
+
+    finally:
+        print >>sys.stderr, 'closing socket'
+        sock.close()
+        return data
+
+def getHalfMAC(interface='wlan0'):
+  # Return the MAC address of the specified interface
+  try:
+    str = open('/sys/class/net/%s/address' %interface).read()
+    str = (str.split(':')[3]+str.split(':')[4]+str.split(':')[5]).upper().strip('\n')
+  except:
+    str = "000000"
+  return str
+
+os.system('service bluetooth start')
+time.sleep(2)
+send_command("return_to_bluetooth")
+send_command("red_blink")
+
+
+
+subprocess.call(['/opt/mcs/cbox/bluetooth_adv'], shell=True)
+#print >>sys.stderr, 'sending "%s"' % message
+message = ''
+
+server_socket=BluetoothSocket(RFCOMM)
+server_socket.bind(("", PORT_ANY))
+server_socket.listen(1)
+port = server_socket.getsockname()[1]
+service_id = str(uuid.uuid4())
+ 
+advertise_service(server_socket, "LEDServer",
+                  service_id = service_id,
+                  service_classes = [service_id, SERIAL_PORT_CLASS],
+                  profiles = [SERIAL_PORT_PROFILE])
+ 
+try:
+    print('press Ctrl-C to exit')
+    while True:
+        print('wait for RFCOMM channel {} connection'.format(port))
+        client_socket, client_info = server_socket.accept()
+        print('accecpit from {} connection'.format(client_info))
+        try:
+            while True:
+                data = client_socket.recv(1024).decode()
+                if len(data) == 0:
+                    break
+                if data[0:4] == 'info':
+                    #GPIO.output(LED_PIN, GPIO.HIGH) #-> send_command(message)
+                    print('info')
+                    # Send data
+                    message = subprocess.check_output(['/opt/mcs/tnlctl/bin/helper/get-serial.sh'])
+                    print >>sys.stderr, 'sending "%s"' % message
+                    client_socket.sendall(message)
+                    message = ''
+                elif data[0:4] == 'acti':
+                    print('activate')
+                    # Send data
+                    message = 'info: activate\n'+subprocess.check_output(['/opt/mcs/tnlctl/bin/api/reg/v1/activate.sh',data.split(':')[1],data.split(':')[2],data.split(':')[3],data.split(':')[4],data.split(':')[5]])
+                    print >>sys.stderr, 'sending "%s"' % message
+                    client_socket.sendall(message)
+                    message =''
+                elif data[0:4] == 'wifi':
+                    print data.split(':')
+                    # Send data
+                    message='echo "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=TW\nnetwork={\nssid=\\"'+data.split(':')[1]+'\\"\npsk=\\"'+data.split(':')[2]+'\\"\n}" > /etc/wpa_supplicant/wpa_supplicant.conf'
+                    subprocess.call([message], shell=True)
+                    print >>sys.stderr, 'sending "%s"' % message
+                    #client_socket.sendall(message)
+                    message =''
+                    if not os.path.exists('/etc/machine-info'):
+                        message='PRETTY_HOSTNAME=PORTEX-'+getHalfMAC()
+                        fo = open("/etc/machine-info", "w")
+                        fo.write(message)
+                        fo.close()
+                        #print message
+                        #subprocess.call([message], shell=True)
+                        print >>sys.stderr, 'sending "%s"' % message
+                        time.sleep(3)
+
+                    message = subprocess.check_output(['reboot'])
+
+                    #message = subprocess.check_output(['systemctl daemon-reload'])
+                    #print >>sys.stderr, 'sending "%s"' % message
+                    #client_socket.sendall(message)
+                    #message =''
+                    #message = subprocess.check_output(['/etc/init.d/dhcpcd', 'restart'])
+                    #print >>sys.stderr, 'sending "%s"' % message
+                    #client_socket.sendall(message)
+                    #message =''
+
+                elif data[0:4] == 'clou':
+                    print('cloud connect')
+                    #GPIO.output(LED_PIN, GPIO.LOW) #-> send_command(message)
+                    send_command("white_on")
+                    message =''
+                    try:
+                        message = 'info: cloud\n'+ subprocess.check_output(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'])
+                    except Exception as e:
+                        print("Command failed: {}".format(e))
+                    print >>sys.stderr, 'sending "%s"' % message
+                    client_socket.sendall(message)
+
+
+
+                elif data[0:4] == 'upgr':
+                    print('upgrade')
+                    #GPIO.output(LED_PIN, GPIO.LOW) #-> send_command(message)
+                    try:
+                        subprocess.check_output(['apt-get', 'update'])
+                    except Exception as e:
+                        print("Command failed: {}".format(e))
+                    try:
+                        message = 'info: upgrade\n'+subprocess.check_output(['apt-get', 'install', 'tnlctl'])
+                    except Exception as e:
+                        print("Command failed: {}".format(e))
+                    print >>sys.stderr, 'sending "%s"' % message
+                    client_socket.sendall(message)
+                elif data[0:4] == 'leds':
+                    #GPIO.output(LED_PIN, GPIO.HIGH) #-> send_command(message)
+                    print('leds')
+                    message = send_command("red_status")+','+send_command("blue_status")+','+send_command("white_status")+','+send_command("yellow_status")+','
+                    print >>sys.stderr, 'sending "%s"' % message
+                    client_socket.sendall(message)
+                    message = ''
+                
+                else:
+                    print('known command: {}'.format(data))
+        except IOError:
+            pass
+        client_socket.close()
+        print('disconnect')
+except KeyboardInterrupt:
+    print('program exit')
+finally:
+    if 'client_socket' in vars():
+        client_socket.close()
+    server_socket.close()
+    GPIO.cleanup()
+    print('disconnect')
