@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 #
 #
+
+# Check necessary package
+apt update
+apt dist-upgrade
+apt install -y python-pip build-essential python-dev python-smbus libbluetooth-dev dialog git minicom tmux whois ntpdate libmariadb3 libsensors-config libsensors5 libsnmp-base libsnmp30 libutempter0 lrzsz mariadb-common mysql-common screen snmp vim vim-runtime
+
+# Check necessary Python library
+pip2 install --upgrade pip
+pip2 install pybluez Pillow==2.2.2 RPi.GPIO Adafruit_DHT Adafruit-SSD1306
+
 # Check if pseudo account is exist
 grep "portex" </etc/passwd >/dev/null
 if [ $? = 1 ]; then

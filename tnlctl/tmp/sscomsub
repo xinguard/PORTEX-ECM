@@ -1,0 +1,136 @@
+#!/bin/bash
+#
+#Revision:2018110407
+#
+
+export PATH=/sbin:${PATH}
+
+PROG_NAME=sscomsub
+
+INPUT=/tmp/${PROG_NAME}-input.$$
+OUTPUT=/tmp/${PROG_NAME}-output.$$
+
+# trap and delete temp files
+trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
+
+USB_PORT=${1:-USB0}
+
+#
+# Purpose - display output using msgbox
+#  $1 -> set msgbox height
+#  $2 -> set msgbox width
+#  $3 -> set msgbox title
+#
+function display_output(){
+    local h=${1-10}        # box height default 10
+    local w=${2-41}        # box width default 41
+    local t=${3-Output}    # box title
+    dialog --backtitle "SS Menu Output" --title "${t}" --clear --msgbox "$(<$OUTPUT)" ${h} ${w}
+}
+
+function get_pid(){
+    local up=${1}
+    local pid=""
+
+    if [ "x${up}" != "x" ]
+    then
+        pid=$(ps -ef|grep "minicom ${up}"|grep -v grep|awk '{print $2}')
+    fi
+
+    # CAUTION!!! use echo here
+    echo ${pid}
+}
+#
+# Purpose - display a system info
+#
+function show_usb_port_info(){
+    local up=${1}
+    local pid=""
+
+    if [ "x${up}" = "x" ]
+    then
+        echo "Error: Wrong Parameter." > $OUTPUT
+        display_output 20 80 "USB Port Info ()"
+    else
+        ls -l /dev/tty${up} > $OUTPUT
+        echo "--" >> $OUTPUT
+
+        pid=$(get_pid ${up})
+        if [ "x${pid}" = "x" ]
+        then
+            if [ -e /dev/tty${up} ]
+            then
+                echo "Port ${up} is available." >> $OUTPUT
+            else
+                echo "No device attached to port ${up}" >> $OUTPUT
+            fi
+        else
+            echo "Port ${up} is being controlled by process ${pid}." >> $OUTPUT
+            echo "If the process was stuck, use [reset] in previous menu to kill it." >> $OUTPUT
+        fi
+
+        display_output 20 80 "USB Port Info(${up})"
+    fi
+}
+#
+# set infinite loop
+#
+while true
+do
+
+    ### display main menu ###
+    dialog --clear  --help-button --backtitle "MCSC SS USB CONSOLE for ${USB_PORT}" \
+    --timeout 300 \
+    --title "[ USB - CONSOLE - ${USB_PORT} ]" \
+    --menu "Choose the TASK" 20 50 12 \
+        "status"  "Display Status " \
+        "connect" "Connect to ${USB_PORT}" \
+        "reset"   "Reset ${USB_PORT}" \
+        "setup"   "Setup ${USB_PORT}" \
+        Exit "Back to USB CONSOLE" 2>"${INPUT}"
+
+    _status=$?
+    if [ ${_status} -eq 255 ]
+    then
+        # got dialog timeout
+        exit 0
+    fi
+
+    menuitem=$(<"${INPUT}")
+
+    # make decision
+    case $menuitem in
+        "status")  show_usb_port_info ${USB_PORT};;
+        "connect")
+            # check if previous process controlling the port
+            _pid=$(get_pid ${USB_PORT})
+            if [ ! "x${_pid}" = "x" ]
+            then
+                echo "Warning:" > $OUTPUT
+                echo "Port ${USB_PORT} is being controlled by process ${_pid}." >> $OUTPUT
+                echo "If the process was stuck, use [reset] in previous menu to kill it." >> $OUTPUT
+                display_output 20 80 "Trying to connect to port ${USB_PORT}..."
+            else
+                # port is available, try to connect to it
+                [ -e /dev/tty${USB_PORT} ] && minicom ${USB_PORT}
+            fi
+            ;;
+        "reset")
+            # find the pid of minicom process for specific usb port ${USB_PORT}
+            # and then kill -HUP it to reset the process
+            ps -ef \
+                | grep "minicom ${USB_PORT}" \
+                | grep -v grep \
+                | awk '{print "kill -HUP ",$2}' \
+                | sh
+            ;;
+        "setup") ./sscomsetup ${USB_PORT};;
+        Exit) exit 0;;
+    esac
+
+done
+
+# if temp files found, delete em
+[ -f $OUTPUT ] && rm $OUTPUT
+[ -f $INPUT ] && rm $INPUT
+
