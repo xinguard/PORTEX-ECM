@@ -12,10 +12,7 @@ pip2 install --upgrade pip
 pip2 install pybluez Pillow==2.2.2 RPi.GPIO Adafruit_DHT Adafruit-SSD1306
 
 # Check if pseudo account is exist
-grep "portex" </etc/passwd >/dev/null
-if [ $? = 1 ]; then
-    useradd --home /home/portex --shell /usr/sbin/nologin -m -U portex
-fi
+/home/pi/PORTEX-ECM/tnlctl/tmp/postinstall.sh
 
 TARGET_DIR=/home/portex/portex_ecm.d
 
