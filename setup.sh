@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#
+#
+# Check if pseudo account is exist
+grep "portex" </etc/passwd >/dev/null
+if [ $? = 1 ]; then
+    useradd --home /home/portex --shell /usr/sbin/nologin -m -U portex
+fi
 
 TARGET_DIR=/home/portex/portex_ecm.d
 
@@ -16,3 +23,11 @@ cp led-daemon /etc/init.d
 sudo update-rc.d led-daemon defaults
 cp pwr-and-control-button-monitor /etc/init.d
 sudo update-rc.d pwr-and-control-button-monitor defaults
+
+# Add /etc/rc.local entry
+grep "portex_ecm.init" </etc/rc.local >/dev/null
+if [ $? = 1 ]; then
+    declare -i EXIT0_ENTRY=$(grep -n "^exit 0" </etc/rc.local | awk -F: '{print $1}')
+    declare -i INSERT_ENTRY=$((EXIT0_ENTRY - 1))
+    sed -i "${INSERT_ENTRY}a/home/portex/portex_ecm.d/cbox/portex_ecm.init\\n" /etc/rc.local
+fi
