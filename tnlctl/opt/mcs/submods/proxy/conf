@@ -1,7 +1,0 @@
-#    File: config of module proxy
-#Revision:2018101802
-#
-
-PROXY_SERVER_HOST=proxy.xgds.net
-PROXY_SERVER_PORT=80
-

@@ -1,6 +1,0 @@
-Package: tnlctl
-Version: 0.8
-Architecture: armhf
-Description: tnlctl
-Maintainer: support <support@xinguard.com>
-Depends: snmp, minicom, screen, tmux, dialog, git, vim
