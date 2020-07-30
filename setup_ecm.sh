@@ -44,6 +44,8 @@ TARGET_DIR=/home/portex
 
 # Copy package files
 cp bin/taclogin /usr/local/bin
+cp bin/admin_pwr.py /usr/local/bin
+cp bin/led_listen.py /usr/local/bin
 su -s /bin/bash portex -c "cp -R bin/* $TARGET_DIR/bin"
 
 # Copy service files
