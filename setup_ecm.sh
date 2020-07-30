@@ -8,7 +8,7 @@ if [ $UPGRADE_FLAG = upgrade ]; then
     echo "Execute system upgrade check....."
     apt update
     apt -y dist-upgrade
-    apt install -y python-pip python3-pip build-essential python-dev python-smbus libbluetooth-dev dialog git minicom tmux whois ntpdate pigpio python-pigpio python3-pigpio
+    apt install -y python-pip python3-pip build-essential python-dev python-smbus libbluetooth-dev dialog git minicom tmux whois ntpdate libopenjp2-7 libtiff5 pigpio python-pigpio python3-pigpio
     apt autoremove
     apt autoclean
 
