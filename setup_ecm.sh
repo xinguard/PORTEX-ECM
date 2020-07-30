@@ -30,6 +30,7 @@ if [ $? = 1 ]; then
     useradd -m -d /home/portex -s /usr/local/bin/taclogin -c "Shared Session User" -G dialout portex
     echo "Done."
 fi
+sed -i 's/^#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/config.txt
 sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_config
 sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 passwd -d portex >/dev/null 2>&1
