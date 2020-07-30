@@ -1,6 +1,8 @@
 #!/bin/bash
-
-CONF_FILE=/home/portex/portex_ecm.d/ecm/iot_upload.conf
+#
+#
+BASE_DIR="/home/portex"
+CONF_FILE=$BASE_DIR/portex_ecm.conf
 CLOUD_SERVER=$(egrep CLOUD_SERVER $CONF_FILE | awk -F= '{print $2}')
 CLOUD_PORT=$(egrep CLOUD_PORT $CONF_FILE | awk -F= '{print $2}')
 ACCESS_TOKEN=$(egrep ACCESS_TOKEN $CONF_FILE | awk -F= '{print $2}')

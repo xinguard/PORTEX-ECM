@@ -2,7 +2,6 @@
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-
 DHCP_CONF=/etc/dhcpcd.conf
 
 prompt="Select function options: "
@@ -20,7 +19,6 @@ PS3="$prompt "
 select opt in "${options[@]}" "Quit"; do
 
 	case "$REPLY" in
-
 	1)
 		echo "Select display interface status and routing information: "
 		echo ""
@@ -28,14 +26,12 @@ select opt in "${options[@]}" "Quit"; do
 		/sbin/route -n
 		echo ""
 		;;
-
 	2)
 		echo "Show dhcpcd.conf configutation: "
 		echo ""
 		/bin/cat $DHCP_CONF
 		echo ""
 		;;
-
 	3)
 		echo "Select configure DHCP"
 		sed -i 's/^interface eth0/#interface eth0/' $DHCP_CONF
@@ -43,7 +39,6 @@ select opt in "${options[@]}" "Quit"; do
 		sed -i 's/^static routers/#static routers/' $DHCP_CONF
 		sed -i 's/^static domain_name_servers/#static domain_name_servers/' $DHCP_CONF
 		;;
-
 	4)
 		echo "Select configure static IP"
 		echo ""
@@ -62,7 +57,6 @@ select opt in "${options[@]}" "Quit"; do
 		sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^#static domain_name_servers=.*$/static domain_name_servers='"$STATIC_DNS1 $STATIC_DNS2"'/' $DHCP_CONF
 		sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^static domain_name_servers=.*$/static domain_name_servers='"$STATIC_DNS1 $STATIC_DNS2"'/' $DHCP_CONF
 		;;
-
 	5)
 		echo "Select ping test"
 		echo ""
@@ -70,7 +64,6 @@ select opt in "${options[@]}" "Quit"; do
 		/bin/ping -c 5 $TARGET_HOST
 		echo ""
 		;;
-
 	6)
 		echo "Select traceroute test"
 		echo ""
@@ -78,7 +71,6 @@ select opt in "${options[@]}" "Quit"; do
 		/usr/bin/traceroute.db -n $TARGET_HOST
 		echo ""
 		;;
-
 	7)
 		echo "Restart network"
 		echo ""
@@ -86,17 +78,13 @@ select opt in "${options[@]}" "Quit"; do
 		systemctl restart dhcpcd
 		echo ""
 		;;
-
 	$((${#options[@]} + 1)))
 		echo "Goodbye!"
 		break
 		;;
-
 	*)
 		echo "Invalid option. Try another one."
 		continue
 		;;
-
 	esac
-
 done

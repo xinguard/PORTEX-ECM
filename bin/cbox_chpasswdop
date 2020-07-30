@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Configured script to change user password by him/sheself
+#
+BASE_DIR="/home/portex"
+source $BASE_DIR/bin/passwdmgmt
+source $BASE_DIR/bin/configmgmt
+source $BASE_DIR/bin/writelog
+PORTEX_TS_CONF="$BASE_DIR/portex_ts.conf"
+
+function acct_check() {
+	LOCALACCT=$1
+	awk -F: '{print $1}' $PORTEX_TS_CONF | egrep -v '#' | egrep -w $LOCALACCT >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		echo "1"
+	else
+		echo "2"
+	fi
+}
+
+while true; do
+	echo "Change local account $PORTEX_USERID password: "
+	echo ""
+	declare ACCT_NAME="$PORTEX_USERID"
+
+	read -sp "Enter old password: " PWD_OLD
+	echo ""
+	LOCAL_ACCT_NAME=$(cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$ACCT_NAME:localuser:" | awk -F: '{print $1}')
+	LOCAL_ACCT_PRIVILEGE=$(cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$ACCT_NAME:localuser:" | awk -F: '{print $3}')
+	LOCAL_ACCT_CRYPT=$(cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$ACCT_NAME:localuser:" | awk -F: '{print $4}')
+	echo $LOCAL_ACCT_NAME $LOCAL_ACCT_PRIVILEGE $LOCAL_ACCT_CRYPT
+	PASS_CHECK -c $PWD_OLD:$LOCAL_ACCT_CRYPT
+	if [ $? -eq 1 ]; then
+		echo "Old password is not correct; try again."
+		break
+	fi
+	read -sp "Enter new password: " PWD_INPUT
+	echo ""
+	read -sp "Retype new password: " PWD_INPUT2
+	echo ""
+	NEWPASS_CHECK $PWD_INPUT $PWD_INPUT2
+	case $? in
+	0)
+		PWD_SALT=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
+		OUTPUT_CRYPT=$(mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT)
+		echo $LOCAL_ACCT_NAME:localuser:$LOCAL_ACCT_PRIVILEGE:$OUTPUT_CRYPT
+		CONFIG_CHANGE -p $ACCT_NAME:localuser:$LOCAL_ACCT_PRIVILEGE:$OUTPUT_CRYPT
+		echo "Local account $ACCT_NAME password is changed."
+		sleep 3
+		break
+		;;
+	1)
+		NEWPASS_NOTIFY
+		break
+		;;
+	2)
+		echo "User password does not match, try again."
+		;;
+	*)
+		echo "Fetal error."
+		break
+		;;
+	esac
+done

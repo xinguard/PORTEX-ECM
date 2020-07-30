@@ -1,15 +1,30 @@
 #! /bin/bash
+#
+#
+BASE_DIR="/home/portex"
+
+# LED initial
 echo -e "green_blink\c" | sudo nc -q 1 -U /var/run/uds_led
-#apt-get update
-#apt-get -y install tnlctl cbox-panel-control minicom
-/home/portex/portex_ecm.d/cbox/regcheckc >/dev/null 2>&1 &
-/home/portex/portex_ecm.d/cbox/tnlcheckc >/dev/null 2>&1 &
+echo -e "red_on\c" | sudo nc -q 1 -U /var/run/uds_led
+
+# iptable initial
+$BASE_DIR/bin/concontrol
+
+# Log initial
+su -s /bin/bash portex -c "$BASE_DIR/bin/logbufferinit"
+su -s /bin/bash portex -c "$BASE_DIR/bin/sendlog >/dev/null 2>&1 &"
+
+# Start regular check
+$BASE_DIR/bin/gwcheck >/dev/null &
+$BASE_DIR/bin/tscheck >/dev/null &
 
 # Start DHT22 & OLED
-/home/portex/portex_ecm.d/ecm/dht22_data.py >/dev/null 2>&1 &
+/usr/bin/pigpiod >/dev/null 2>&1 &
+/home/portex/bin/DHT.py >/dev/null 2>&1 &
+/home/portex/bin/oled_daemon.py >/dev/null 2>&1 &
 
 # Start DHT22 data upload
-/home/portex/portex_ecm.d/ecm/dht22_http_upload.sh >/dev/null 2>&1 &
+/home/portex/bin/dht22_http_upload.sh >/dev/null 2>&1 &
 
 # Start UPS data collection
 #/home/portex/portex_ecm.d/ecm/ups_data.sh >/dev/null 2>&1 &

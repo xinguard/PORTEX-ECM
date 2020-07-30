@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Configured script to set Ethernet and WiFi configuration
+#
+BASE_DIR="/home/portex"
+
+prompt="Select function options: "
+options=("TACACS+ server management"
+	"LOG server management"
+	"NTP server management"
+	"Connection ACL management"
+	"Local user management"
+)
+
+echo ""
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do
+	case "$REPLY" in
+	1)
+		echo "Launch TACACS+ server management: "
+		echo ""
+		$BASE_DIR/bin/cbox_tacserver
+		echo ""
+		;;
+	2)
+		echo "Launch LOG server management: "
+		echo ""
+		$BASE_DIR/bin/cbox_logserver
+		echo ""
+		;;
+	3)
+		echo "Launch NTP server management: "
+		echo ""
+		$BASE_DIR/bin/cbox_ntpserver
+		echo ""
+		;;
+	4)
+		echo "Connection ACL management: "
+		echo ""
+		sudo $BASE_DIR/bin/cbox_acl
+		echo ""
+		;;
+	5)
+		echo "Local user management: "
+		echo ""
+		$BASE_DIR/bin/cbox_user
+		echo ""
+		;;
+	$((${#options[@]} + 1)))
+		echo "Goodbye!"
+		break
+		;;
+	*)
+		echo "Invalid option. Try another one."
+		continue
+		;;
+	esac
+done
