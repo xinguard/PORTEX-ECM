@@ -59,9 +59,23 @@ sudo update-rc.d led-daemon defaults
 sudo update-rc.d pwr-and-control-button-monitor defaults
 
 # Install configuration files for portex
-[ ! -f $TARGET_DIR/portex_ts.conf ] && su -s /bin/bash portex -c "cp etc/portex_ts.conf $TARGET_DIR"
-su -s /bin/bash portex -c "cp etc/.tmux.conf $TARGET_DIR"
-[ ! -f $TARGET_DIR/portex_ecm.conf ] && su -s /bin/bash portex -c "cp etc/portex_ecm.conf $TARGET_DIR"
+if [ ! -f $TARGET_DIR/portex_ts.conf ]; then
+    su -s /bin/bash portex -c "cp etc/portex_ts.conf $TARGET_DIR"
+else
+    echo "Configuration $TARGET_DIR/portex_ts.conf is exist, configuration template copy is ignored."
+fi
+
+if [ ! -f $TARGET_DIR/.tmux.conf ]; then
+    su -s /bin/bash portex -c "cp etc/.tmux.conf $TARGET_DIR"
+else
+    echo "Configuration $TARGET_DIR/.tmux.conf is exist, configuration template copy is ignored."
+fi
+
+if [ ! -f $TARGET_DIR/portex_ecm.conf ]; then
+    su -s /bin/bash portex -c "cp etc/portex_ecm.conf $TARGET_DIR"
+else
+    echo "Configuration $TARGET_DIR/portex_ecm.conf is exist, configuration template copy is ignored."
+fi
 
 # Add /etc/rc.local entry
 grep "portex_ecm.init" </etc/rc.local >/dev/null
