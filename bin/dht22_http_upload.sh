@@ -18,11 +18,13 @@ sed -i '/HTTP_F_1/d' $RAW_FILE
 
 function http_upload() {
 	TIME=$(echo $1 | awk -F. '{print $1"000"}')
-	TEMP=$(echo $2 | awk -F: '{print $2}')
-	HUM=$(echo $3 | awk -F: '{print $2}')
+        TEMP_KEY=$(echo $2 | awk -F: '{print $1}')
+        TEMP=$(echo $2 | awk -F: '{print $2}')
+        HUM_KEY=$(echo $3 | awk -F: '{print $1}')
+        HUM=$(echo $3 | awk -F: '{print $2}')
 	#	declare -i VER=`shuf -i 0-1 -n 1`
 	declare -i VER=0
-	curl -v -X POST -d "{'ts':$TIME, 'values': {'temprature':'$TEMP', 'humidity':'$HUM'}}" http://$CLOUD_SERVER:8080/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
+	curl -v -X POST -d "{'ts':$TIME, 'values': {'$TEMP_KEY':'$TEMP', '$HUM_KEY':'$HUM'}}" http://$CLOUD_SERVER:8080/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
 }
 
 while true; do
