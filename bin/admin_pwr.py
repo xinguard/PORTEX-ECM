@@ -14,7 +14,7 @@ server_address = '/var/run/uds_led'
 
 hardware = os.popen("cat /proc/cpuinfo | grep Hardware | awk '{print $3}'"
                     ).readlines()[0].strip('\n')
-if (hardware == "BCM2835"):
+if (hardware == "BCM2835") or (hardware == "BCM2711"):
     GPIO.setmode(GPIO.BOARD)
     # previous bread board setup
     # POWER_BUTTON_PIN = 33
