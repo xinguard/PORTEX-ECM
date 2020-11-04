@@ -16,7 +16,7 @@ if [ $UPGRADE_FLAG = upgrade ]; then
     pip2 install --upgrade pip
     pip2 install pybluez RPi.GPIO
     pip3 install --upgrade pip
-    pip3 install RPi.GPIO pillow Adafruit-SSD1306
+    pip3 install RPi.GPIO pillow Adafruit-SSD1306 Adafruit_BBIO
 else
     echo "Bypass system upgrade check; use \"sudo ./setup_ecm.sh upgrade\" to execute..... "
 fi
